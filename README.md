@@ -1,9 +1,9 @@
 [SAKURA PHOTOS](http://sakura.playshiritori.com/)
 ==========
 
-Let's look beautifule japanese SAKURA pictures from twitter!
+Let's look at beautiful Japanese SAKURA pictures from Twitter!
 
-This application shows the photos that were tweeted with #桜2012 has tag.
+This application shows the photos that were tweeted with #桜2012 hash tag.
 
 
 
