@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext, Context, loader
 from datetime import datetime
+from tweets.models import *
 import settings
 import urllib2
 import json
@@ -42,10 +43,6 @@ def search_photos(page_id):
         END_POINT, search_key, page_id)
     results = httpget(address)['results']
     url_histories = {}
-    # TODO make blacklist automate
-    url_blacklist = {
-        'http://p.twimg.com/ApJqZr7CMAAT9cu.jpg': True,
-    }
 
     for result in results:
         entities = result['entities']
@@ -53,18 +50,27 @@ def search_photos(page_id):
         entities_urls = entities['urls']
         media = entities.get('media', '')
         date = datetime.strptime(result['created_at'], '%a, %d %b %Y %H:%M:%S +%f')
+
+        from_user = result['from_user']
+        if is_blacklist_name(from_user):
+            continue
+        username = '@%s' % (from_user)
+
         geo = result['geo']
-        username = '@%s' % (result['from_user'])
         if geo:
             addr = get_location(geo['coordinates'])
             geo['addr'] = addr
+
         if media:
-            for m in media:
-                url = m['media_url']
-                if url and not url_histories.get(url, False) and not url_blacklist.get(url, False):
+            for med in media:
+                url = med['media_url']
+                tco_url = med['url']
+                if is_blacklist_url(tco_url):
+                    continue
+                if url and not url_histories.get(url, False):
                     photos.append({
                         'text': text,
-                        'url': m['expanded_url'],
+                        'url': med['expanded_url'],
                         'imgsrc': url,
                         'date': date.strftime('%Y/%m/%d %H:%M:%S'),
                         'geo': geo,
@@ -74,7 +80,10 @@ def search_photos(page_id):
         elif entities_urls:
             for entities_url in entities_urls:
                 url = entities_url['expanded_url']
-                if url and not url_histories.get(url, False) and not url_blacklist.get(url, False):
+                tco_url = entities_url['url']
+                if is_blacklist_url(tco_url):
+                    continue
+                if url and not url_histories.get(url, False):
                     imgsrc = get_imgsrc(url)
                     if imgsrc is not None:
                         photos.append({
@@ -87,6 +96,12 @@ def search_photos(page_id):
                         })
                         url_histories[url] = 'true'
     return photos
+
+
+# Check if the URL is in BlackList
+is_blacklist_url = lambda u: BlackList.objects.filter(tco_url=u)
+# Check if the screen_name is in BlackList
+is_blacklist_name = lambda u: BlackList.objects.filter(screen_name=u)
 
 
 # For ajax(json) response, wrapper json data to convert HttpResponse
@@ -102,6 +117,35 @@ def httpget(address, user_agent='myagent'):
     opener.addheaders = [('User-agent', user_agent)]
     result = opener.open(address).read()
     return parse_json(result)
+
+
+# this method for API that sets tco_url or screen_name to BlackList
+# here is usage:
+#  When you want to report the photo that has url "http://t.co/hogehoge"
+#  You need to set the URL starts with http://t.co.
+#   $ wget http://sakura.playshiritori.com/add_blacklist?tco_url=http://t.co/hogehoge
+#  When you want to report the user that has name keiko713
+#   $ wget http://sakura.playshiritori.com/add_blacklist?screen_name=keiko713
+# if you receive "[Success] Your request is confirmed. Thank you for your help!",
+# your report was succeed.
+def add_blacklist(request):
+    message = None
+    if request.method == 'GET':
+        url = request.GET.get('tco_url', '')
+        name = request.GET.get('screen_name', '')
+        if not url and not name:
+            message = '[Error: Invalid Request Parameters] Please put the param either url or screen_name'
+        else:
+            if url and not url.startswith('http://t.co/'):
+                message = '[Error: Invalid Request Parameters] Please put http://t.co/ URL for the url parameter'
+            else:
+                if not is_blacklist_url(url) or not is_blacklist_name(name):
+                    black_list = BlackList(tco_url=url, screen_name=name)
+                    black_list.save()
+                    message = '[Success] Your request is confirmed. Thank you for your help!'
+    resp = HttpResponse(message, 'text/plain')
+    resp.code = 200
+    return resp
 
 
 # get the location info (City, Prefecture) from lat and lng
@@ -147,11 +191,11 @@ def get_urlize_text(result):
             urlize = u'<a href="%s">%s</a>' % (href, tag)
             text = text.replace(tag, urlize)
  
-    medias = entities.get('media', '')
-    if medias:
-        for media in medias:
-            urlize = '<a href="%s">%s</a>' % (media['url'], media['display_url'])
-            text = text.replace(media['url'], urlize)
+    media = entities.get('media', '')
+    if media:
+        for med in media:
+            urlize = '<a href="%s">%s</a>' % (med['url'], med['display_url'])
+            text = text.replace(med['url'], urlize)
 
     return text
 

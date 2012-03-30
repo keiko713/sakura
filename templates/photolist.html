@@ -15,7 +15,7 @@
     <p>
       <a href="#" onclick="return viewmap('mapcanvas{{ pageid }}_{{ forloop.counter }}', {{ photo.geo.coordinates.0 }}, {{ photo.geo.coordinates.1 }});"><i class="icon-screenshot"></i> from {{ photo.geo.addr }}</a>
     </p>
-    <div class="mapcanvas" id="mapcanvas1_{{ forloop.counter }}" style="display: none;">
+    <div class="mapcanvas" id="mapcanvas{{ pageid }}_{{ forloop.counter }}" style="display: none;">
     </div>
     {% endif %}
     </div>
