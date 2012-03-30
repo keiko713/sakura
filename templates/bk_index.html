@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SAKURA PHOTOS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet">
+<link href="{{ STATIC_URL }}css/bootstrap-responsive.css" rel="stylesheet">
+<link href="{{ STATIC_URL }}css/docs.css" rel="stylesheet">
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-21857766-3']);
+  _gaq.push(['_setDomainName', 'playshiritori.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+<body>
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="/">
+        SAKURA #桜2012 PHOTOS
+      </a>
+      <span class="pull-right twbutton">
+<a href="https://twitter.com/share" class="twitter-share-button" data-via="keiko713" data-count="none" data-hashtags="桜2012">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+      </span>
+      <span class="pull-right twbutton">
+<a href="https://twitter.com/intent/tweet?button_hashtag=%E6%A1%9C2012" class="twitter-hashtag-button">Tweet #%E6%A1%9C2012</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+      </span>
+    </div>
+  </div>
+</div><!-- /navbar -->
+<div class="container">
+<ul class="thumbnails" id="id_thumbnails">
+{% for photo in photos %}
+  <li class="span4">
+    <div class="thumbnail">
+    <a href="{{ photo.url }}">
+      <img src="{{ photo.imgsrc }}">
+    </a>
+    <div class="caption">
+    <p class="photo-date">
+      <small>{{ photo.date }}</small>
+    </p>
+    <p>{{ photo.text|urlize }}</p>
+    {% if photo.geo %}
+    <p>
+      <a href="#" onclick="return viewmap('mapcanvas1_{{ forloop.counter }}', {{ photo.geo.coordinates.0 }}, {{ photo.geo.coordinates.1 }});"><i class="icon-screenshot"></i> from {{ photo.geo.addr }}</a>
+    </p>
+    <div class="mapcanvas" id="mapcanvas1_{{ forloop.counter }}" style="display: none;">
+    </div>
+    {% endif %}
+    </div>
+    </div>
+  </li>
+{% endfor %}
+</ul>
+<div class="row">
+<button class="btn span12" onclick="getpage()">もっと見る</button>
+</div>
+<footer class="footer">
+  <p class="pull-right">Created by <a href="https://twitter.com/#!/keiko713">@keiko713</a></p>
+</footer>
+</div><!-- /container -->
+<script src="{{ STATIC_URL }}js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+function viewmap(id, lat, lng) {
+  var mapDiv = document.getElementById(id);
+  if (mapDiv.style.display == "block") {
+    mapDiv.style.display = "none";
+    return false;
+  }
+  mapDiv.style.display = "block";
+  var latlng = new google.maps.LatLng(lat, lng);
+  var myOptions = {
+      zoom: 12,
+      center: latlng,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+  };
+  map = new google.maps.Map(mapDiv, myOptions);
+  var marker = new google.maps.Marker({
+    position: latlng,
+    map: map,
+  });
+
+  return false;
+}
+var nextpagenum = 2;
+function getpage() {
+  $.ajax({
+    type: 'GET',
+    url: "/page/" + nextpagenum + "/",
+    success: function(data){
+      console.log(data);
+      html = data.html;
+      var thumbnails = document.getElementById("id_thumbnails");
+      thumbnails.innerHTML = thumbnails.innerHTML + html;
+
+      photos = data.photos;
+      for (var id in photos) {
+        photo = photos[id];
+        /* for image */
+        var newImg = document.createElement("img");
+        newImg.setAttribute("src", photo.imgsrc);
+        var newA = document.createElement("a");
+        newA.setAttribute("href", photo.url);
+        newA.appendChild(newImg);
+
+        /* for caption */
+        var newCapDiv = document.createElement("div");
+        newCapDiv.setAttribute("class", "caption");
+        /* for date */
+        var newP = document.createElement("p");
+        newP.setAttribute("class", "photo-date");
+        newSmall = document.createElement("small");
+        newText = document.createTextNode(photo.date);
+        newSmall.appendChild(newText);
+        newP.appendChild(newSmall);
+        newCapDiv.appendChild(newP);
+        /* for text */
+        newP = document.createElement("p");
+        var newText = document.createTextNode(photo.text);
+        newP.appendChild(newText);
+        newCapDiv.appendChild(newP);
+
+        if (photo.geo != null) {
+          /* for address */
+          var addressP = document.createElement("p");
+          var addressA = document.createElement("a");
+          addressA.setAttribute("href", "#");
+          addressA.setAttribute("onclick", "return viewmap('mapcanvas" + nextpagenum + "_" + id + "', " + photo.geo.coordinates[0] + ", " + photo.geo.coordinates[1] + ");");
+          var addressI = document.createElement("i");
+          addressI.setAttribute("class", "icon-screenshot");
+          var addressText = document.createTextNode(photo.geo.addr);
+          addressA.appendChild(addressI);
+          addressA.appendChild(addressText);
+          addressP.appendChild(addressA);
+
+          newCapDiv.appendChild(addressP);
+          /* for map */
+          var mapDiv = document.createElement("div");
+          mapDiv.setAttribute("class", "mapcanvas");
+          mapDiv.setAttribute("id", "mapcanvas" + nextpagenum + "_" + id);
+          mapDiv.setAttribute("style", "display: none;");
+
+          newCapDiv.appendChild(mapDiv);
+        }
+
+        var newLi = document.createElement("li");
+        newLi.setAttribute("class", "span4");
+        var newThumbDiv = document.createElement("div");
+        newThumbDiv.setAttribute("class", "thumbnail");
+
+        newThumbDiv.appendChild(newA);
+        newThumbDiv.appendChild(newCapDiv);
+        newLi.appendChild(newThumbDiv);
+
+
+        //thumbnails.appendChild(newLi);
+      }
+
+      nextpagenum += 1;
+    }
+  });
+}
+</script>
+</body>
+</html>

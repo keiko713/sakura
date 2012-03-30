@@ -1,0 +1,6 @@
+*.pyc
+*.db
+*.swp
+*.ai
+api_keys.py
+memo_setting.txt
