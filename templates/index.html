@@ -113,7 +113,6 @@ function getpage() {
     type: 'GET',
     url: "/page/" + nextpagenum + "/",
     success: function(data){
-      console.log(data);
       html = data.html;
       var thumbnails = document.getElementById("id_thumbnails");
       thumbnails.innerHTML = thumbnails.innerHTML + html;

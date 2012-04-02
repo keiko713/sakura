@@ -5,7 +5,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'tweets.views.index'),
-    url(r'^add_blacklist$', 'tweets.views.add_blacklist'),
+    url(r'^api/add_blacklist$', 'tweets.views.add_blacklist'),
     url(r'^page/(?P<page_id>\d+)/$', 'tweets.views.get_page'),
 
     # Uncomment the admin/doc line below to enable admin documentation:

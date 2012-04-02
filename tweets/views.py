@@ -123,9 +123,9 @@ def httpget(address, user_agent='myagent'):
 # here is usage:
 #  When you want to report the photo that has url "http://t.co/hogehoge"
 #  You need to set the URL starts with http://t.co.
-#   $ wget http://sakura.playshiritori.com/add_blacklist?tco_url=http://t.co/hogehoge
+#    http://sakura.playshiritori.com/api/add_blacklist?tco_url=http://t.co/hogehoge
 #  When you want to report the user that has name keiko713
-#   $ wget http://sakura.playshiritori.com/add_blacklist?screen_name=keiko713
+#    http://sakura.playshiritori.com/api/add_blacklist?screen_name=keiko713
 # if you receive "[Success] Your request is confirmed. Thank you for your help!",
 # your report was succeed.
 def add_blacklist(request):
