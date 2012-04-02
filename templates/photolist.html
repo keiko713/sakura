@@ -6,7 +6,7 @@
     </a>
     <div class="caption">
     <p class="photo-date">
-      <small>{{ photo.date }} by {{ photo.username }}</small>
+      <small><span class="datetime" alt="{{ photo.date }}"></span> by {{ photo.username }}</small>
     </p>
     {% autoescape off %}
     <p>{{ photo.text }}</p>

@@ -7,6 +7,7 @@ from tweets.models import *
 import settings
 import urllib2
 import json
+import time
 
 API_JSON_ENCODING = 'ISO-8859-1'
 parse_json = lambda s: json.loads(s.decode(API_JSON_ENCODING))
@@ -50,6 +51,7 @@ def search_photos(page_id):
         entities_urls = entities['urls']
         media = entities.get('media', '')
         date = datetime.strptime(result['created_at'], '%a, %d %b %Y %H:%M:%S +%f')
+        date_epoch = int(time.mktime(date.timetuple())) * 1000
 
         from_user = result['from_user']
         if is_blacklist_name(from_user):
@@ -72,7 +74,7 @@ def search_photos(page_id):
                         'text': text,
                         'url': med['expanded_url'],
                         'imgsrc': url,
-                        'date': date.strftime('%Y/%m/%d %H:%M:%S'),
+                        'date': date_epoch,
                         'geo': geo,
                         'username': username,
                     })
@@ -90,7 +92,7 @@ def search_photos(page_id):
                             'text': text,
                             'url': url,
                             'imgsrc': imgsrc,
-                            'date': date.strftime('%Y/%m/%d %H:%M:%S'),
+                            'date': date_epoch,
                             'geo': geo,
                             'username': username,
                         })

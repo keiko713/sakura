@@ -59,7 +59,7 @@
     </a>
     <div class="caption">
     <p class="photo-date">
-      <small>{{ photo.date }} by {{ photo.username }}</small>
+      <small><span class="datetime" alt="{{ photo.date }}"></span> by {{ photo.username }}</small>
     </p>
     {% autoescape off %}
     <p>{{ photo.text }}</p>
@@ -116,10 +116,43 @@ function getpage() {
       html = data.html;
       var thumbnails = document.getElementById("id_thumbnails");
       thumbnails.innerHTML = thumbnails.innerHTML + html;
+      adjusttime();
 
       nextpagenum += 1;
     }
   });
+}
+
+$(function(){
+  adjusttime();
+});
+
+function adjusttime() {
+  var tmpdate = new Date();
+  var tzoffset = tmpdate.getTimezoneOffset() * 60000;
+
+  $('.datetime').each(function(idx,obj){
+    var date_epoch = $(obj).attr('alt');
+    var orgtime = new Date(date_epoch - tzoffset);
+    $(obj).html(format(orgtime));
+  });
+}
+
+function format(datetime) {
+  var y = datetime.getFullYear();  
+  var m = addzero(datetime.getMonth() + 1);  
+  var d = addzero(datetime.getDate()); 
+  var hour = addzero(datetime.getHours());
+  var min = addzero(datetime.getMinutes());
+  var sec = addzero(datetime.getSeconds());
+  return y + '/' + m + '/' + d + ' ' + hour + ':' + min + ':' + sec
+}
+
+function addzero(arg) {
+  if (arg < 10) {
+    arg = '0' + arg;
+  }
+  return arg;
 }
 </script>
 </body>
