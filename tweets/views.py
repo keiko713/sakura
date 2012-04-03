@@ -50,8 +50,7 @@ def search_photos(page_id):
         text = get_urlize_text(result)
         entities_urls = entities['urls']
         media = entities.get('media', '')
-        date = datetime.strptime(result['created_at'], '%a, %d %b %Y %H:%M:%S +%f')
-        date_epoch = int(time.mktime(date.timetuple())) * 1000
+        date_epoch = result['created_at']
 
         from_user = result['from_user']
         if is_blacklist_name(from_user):
