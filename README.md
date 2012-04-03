@@ -17,6 +17,15 @@ Quick start
 
 
 
+Before quick start (Never run Django before? Do this!)
+----------
+
+ * Install pip (If you have, skip here). `sudo easy_install pip`
+ * Install Django. `sudo pip install Django`
+ * Now, you can do quick start!
+
+
+
 Copyright and license
 ----------
 Copyright 2012 [Keiko Oda](http://twitter.com/keiko713)
