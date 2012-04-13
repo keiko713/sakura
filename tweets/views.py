@@ -227,7 +227,7 @@ def get_imgsrc(url):
         return 'http://photozou.jp/p/img/' + tmp[-1]
     if url.startswith('http://twitpic.com/'):
         tmp = url.split('/')
-        return 'http://twitpic.com/show/large/' + tmp[-1]
+        return 'http://twitpic.com/show/full/' + tmp[-1]
     if url.startswith('http://flic.kr/') or url.startswith('http://www.flickr.com/'):
         return get_flickr_src(url)
     if url.startswith('http://movapic.com/'):
