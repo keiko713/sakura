@@ -134,7 +134,9 @@ $(function(){
       var $newElems = $(newElements).css({ opacity: 0 });
       $newElems.imagesLoaded(function() {
         $newElems.css({ opacity: 1 });
-        $thumbnails.masonry('appended', $newElems, true);
+        $thumbnails.masonry('appended', $newElems, false, function(){
+          $('infscr-loading').hide();
+        });
       });
     }
   );
