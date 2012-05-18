@@ -137,6 +137,7 @@ $(function(){
         $newElems.css({ opacity: 1 });
         $thumbnails.masonry('appended', $newElems, false, function(){
           $('infscr-loading').hide();
+          adjusttime();
         });
       });
     }
@@ -146,7 +147,9 @@ $(function(){
 function adjusttime() {
   $('.datetime').each(function(idx,obj){
     var mydate = new Date($(obj).attr('alt'));
-    $(obj).html(format(mydate));
+    if(mydate != null) {
+      $(obj).html(format(mydate));
+    }
   });
 }
 

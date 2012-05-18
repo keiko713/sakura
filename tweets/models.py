@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class GeoData(models.Model):
     geo_address = models.CharField(max_length=100)
     geo_lat = models.CharField(max_length=20)

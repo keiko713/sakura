@@ -9,8 +9,10 @@ import urllib2
 import json
 import time
 
+
 API_JSON_ENCODING = 'utf-8'
 parse_json = lambda s: json.loads(s.decode(API_JSON_ENCODING))
+
 
 def index(request):
     photos = search_photos('1')
@@ -18,18 +20,22 @@ def index(request):
         'photos': photos,
     }, context_instance=RequestContext(request))
 
-# if user click the button "もっと見る", the browser send
-# ajax request to server, and return next page's photos
-# to the client
+
 def get_page(request, page_id):
+    """
+    Get the given page_id's page, and return the fragment of HTML.
+    """
     photos = search_photos(str(page_id))
     return render_to_response('photolist.html', {
         'photos': photos,
         'pageid': page_id,
     }, context_instance=RequestContext(request))
 
-# search photos that has hashtag #桜2012
+
 def search_photos(page_id):
+    """
+    Search photos that have hashtag #桜2012
+    """
     photos = []
     END_POINT = 'http://search.twitter.com/search.json'
     search_key_uni = u'#桜2012'
@@ -99,54 +105,72 @@ is_blacklist_url = lambda u: BlackList.objects.filter(tco_url=u)
 is_blacklist_name = lambda u: BlackList.objects.filter(screen_name=u)
 
 
-# For ajax(json) response, wrapper json data to convert HttpResponse
 def json_response(data, code=200, mimetype='application/json'):
+    """
+    For ajax(json) response, wrapper json data to convert HttpResponse.
+    """
     resp = HttpResponse(data, mimetype)
     resp.code = code
     return resp
 
-# send GET request to the endpoint and get the information in JSON
-# TODO need handlings of errors, such as urllib2.HTTPError(404, etc)
+
 def httpget(address, user_agent='myagent'):
+    """
+    Send GET request to the endpoint and get the information in JSON
+    TODO need handlings of errors, such as urllib2.HTTPError(404, etc)
+    """
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent', user_agent)]
     result = opener.open(address).read()
     return parse_json(result)
 
 
-# this method for API that sets tco_url or screen_name to BlackList
-# here is usage:
-#  When you want to report the photo that has url "http://t.co/hogehoge"
-#  You need to set the URL starts with http://t.co.
-#    http://sakura.playshiritori.com/api/add_blacklist?tco_url=http://t.co/hogehoge
-#  When you want to report the user that has name keiko713
-#    http://sakura.playshiritori.com/api/add_blacklist?screen_name=keiko713
-# if you receive "[Success] Your request is confirmed. Thank you for your help!",
-# your report was succeed.
 def add_blacklist(request):
+    """
+    This method is for API that sets tco_url or screen_name to BlackList.
+    Here is usage:
+    When you want to report the photo that has url "http://t.co/hogehoge"
+    You need to set the URL starts with http://t.co.
+
+      http://sakura.playshiritori.com/api/
+        add_blacklist?tco_url=http://t.co/hogehoge
+
+    When you want to report the user that has name keiko713
+      http://sakura.playshiritori.com/api/
+        add_blacklist?screen_name=keiko713
+
+    if you receive following, your report was succeed:
+      "[Success] Your request is confirmed. Thank you for your help!"
+    """
     message = None
     if request.method == 'GET':
         url = request.GET.get('tco_url', '')
         name = request.GET.get('screen_name', '')
         if not url and not name:
-            message = '[Error: Invalid Request Parameters] Please put the param either url or screen_name'
+            message = '[Error: Invalid Request Parameters]' \
+              + ' Please put the param either url or screen_name'
         else:
             if url and not url.startswith('http://t.co/'):
-                message = '[Error: Invalid Request Parameters] Please put http://t.co/ URL for the url parameter'
+                message = '[Error: Invalid Request Parameters]' \
+                  + ' Please put http://t.co/ URL for the url parameter'
             else:
                 if not is_blacklist_url(url) or not is_blacklist_name(name):
                     black_list = BlackList(tco_url=url, screen_name=name)
                     black_list.save()
-                    message = '[Success] Your request is confirmed. Thank you for your help!'
+                    message = '[Success] Your request is confirmed.' \
+                     + ' Thank you for your help!'
     resp = HttpResponse(message, 'text/plain')
     resp.code = 200
     return resp
 
 
-# get the location info (City, Prefecture) from lat and lng
-# TODO supports only in Japan, need to support more!
 def get_location(coordinates):
-    END_POINT = 'http://geoapi.heartrails.com/api/json?method=searchByGeoLocation'
+    """
+    Get the location info (City, Prefecture) from lat and lng.
+    TODO: supports only in Japan, need to support more!
+    """
+    END_POINT = 'http://geoapi.heartrails.com/api/' \
+                + 'json?method=searchByGeoLocation'
     lat = coordinates[0]
     lng = coordinates[1]
     address = END_POINT + '&y=' + str(lat) + '&x=' + str(lng)
@@ -159,19 +183,23 @@ def get_location(coordinates):
     return loc['city'] + ', ' + loc['prefecture']
 
 
-# converts URLs, hashtags in text into clickable links
 def get_urlize_text(result):
+    """
+    Converts URLs, hashtags in text into clickable links.
+    """
     text = result['text']
     entities = result['entities']
     urls = result.get('urls', '')
     entities_urls = entities.get('urls', '')
     if urls:
         for url in urls:
-            urlize = '<a href="%s">%s</a>' % (url['url'], url['display_url'])
+            urlize = '<a href="%s">%s</a>' % (
+                    url['url'], url['display_url'])
             text = text.replace(url['url'], urlize)
     if entities_urls:
         for e_url in entities_urls:
-            urlize = '<a href="%s">%s</a>' % (e_url['url'], e_url['display_url'])
+            urlize = '<a href="%s">%s</a>' % (
+                    e_url['url'], e_url['display_url'])
             text = text.replace(e_url['url'], urlize)
 
     hash_tags = entities.get('hashtags', '')
@@ -185,30 +213,33 @@ def get_urlize_text(result):
             tag = u'＃' + h_tag['text']
             urlize = u'<a href="%s">%s</a>' % (href, tag)
             text = text.replace(tag, urlize)
- 
+
     media = entities.get('media', '')
     if media:
         for med in media:
-            urlize = '<a href="%s">%s</a>' % (med['url'], med['display_url'])
+            urlize = '<a href="%s">%s</a>' % (
+                    med['url'], med['display_url'])
             text = text.replace(med['url'], urlize)
 
     return text
 
 
-# get image src from url
-# now, this app supports following third party photo upload:
-#  - yfrog
-#  - twipple
-#  - instagram
-#  - photozou
-#  - twitpic
-#  - flickr
-#  - movapic
-#  - f.hatena
-#  - lockerz
-#  - ow.ly
 #
 def get_imgsrc(url):
+    """
+    Get image src from url.
+    This app supports following third party photo upload:
+      - yfrog
+      - twipple
+      - instagram
+      - photozou
+      - twitpic
+      - flickr
+      - movapic
+      - f.hatena
+      - lockerz
+      - ow.ly
+    """
     if url.startswith('http://yfrog.com/'):
         return url + ':iphone'
     if url.startswith('http://p.twipple.jp/'):
@@ -222,7 +253,8 @@ def get_imgsrc(url):
     if url.startswith('http://twitpic.com/'):
         tmp = url.split('/')
         return 'http://twitpic.com/show/full/' + tmp[-1]
-    if url.startswith('http://flic.kr/') or url.startswith('http://www.flickr.com/'):
+    if url.startswith('http://flic.kr/') \
+        or url.startswith('http://www.flickr.com/'):
         return get_flickr_src(url)
     if url.startswith('http://movapic.com/'):
         tmp = url.split('/')
@@ -232,17 +264,21 @@ def get_imgsrc(url):
         u_id = tmp[3]
         ymd = tmp[4][:8]
         p_id = tmp[4][8:]
-        return 'http://img.f.hatena.ne.jp/images/fotolife/%s/%s/%s/%s%s.jpg' % (
-            u_id[0], u_id, ymd, ymd, p_id)
+        return 'http://img.f.hatena.ne.jp/images/fotolife' \
+                + '/%s/%s/%s/%s%s.jpg' % (u_id[0], u_id, ymd, ymd, p_id)
     if url.startswith('http://lockerz.com/'):
-        return 'http://api.plixi.com/api/tpapi.svc/imagefromurl?url=%s&size=mobile' % (url)
+        return 'http://api.plixi.com/api/tpapi.svc/' \
+                + 'imagefromurl?url=%s&size=mobile' % (url)
     if url.startswith('http://ow.ly/i/'):
         tmp = url.split('/')
         return 'http://static.ow.ly/photos/normal/%s.jpg' % (tmp[-1])
     return None
 
-# get image src from flickr API
+
 def get_flickr_src(url):
+    """
+    Get image src from flickr API.
+    """
     API_KEY = settings.FLICKR_API_KEY
     END_POINT = 'http://api.flickr.com/services/rest/'
     if url.startswith('http://flic.kr/'):
@@ -252,7 +288,8 @@ def get_flickr_src(url):
         tmp = url.split('/')
         id = tmp[-2]
 
-    address = '%s?method=flickr.photos.getSizes&api_key=%s&photo_id=%s&format=json&nojsoncallback=1' % (
+    address = '%s?method=flickr.photos.getSizes&api_key=%s&' \
+            + 'photo_id=%s&format=json&nojsoncallback=1' % (
         END_POINT, API_KEY, str(id))
     results = httpget(address)
     sizes = results['sizes']
@@ -263,8 +300,11 @@ def get_flickr_src(url):
     return url
 
 
-# from https://gist.github.com/865912
 def decode(s):
+    """
+    Decode base 58 encoded string into an integer.
+    From https://gist.github.com/865912
+    """
     alphabet = '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ'
     base_count = len(alphabet)
 
@@ -277,4 +317,3 @@ def decode(s):
         multi = multi * base_count
 
     return decoded
-
