@@ -73,3 +73,33 @@ img {
   border-top: 1px solid #E5E5E5;
   color: #555;
 }
+
+#infscr-loading {
+  height: auto;
+  z-index: 1100;
+  margin: 0px;
+  padding: 5px 15px 5px 10px;
+  position: fixed;
+  top: 40px;
+  left: 40%;
+  text-align: center;
+  background: white;
+  opacity: 0.8;
+  color: black;
+  -webkit-border-bottom-right-radius: 5px;
+  -webkit-border-bottom-left-radius: 5px;
+  -moz-border-radius-bottomright: 5px;
+  -moz-border-radius-bottomleft: 5px;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+@media (max-width: 980px) {
+  #infscr-loading {
+    top: 0px;
+  }
+}
+
+#infscr-loading img {
+  width: 200px;
+}

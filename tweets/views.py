@@ -23,16 +23,10 @@ def index(request):
 # to the client
 def get_page(request, page_id):
     photos = search_photos(str(page_id))
-    t = loader.get_template('photolist.html')
-    c = Context({
+    return render_to_response('photolist.html', {
         'photos': photos,
         'pageid': page_id,
-    })
-    result = {
-        'html': t.render(c),
-    }
-    data = json.dumps(result)
-    return json_response(data)
+    }, context_instance=RequestContext(request))
 
 # search photos that has hashtag #桜2012
 def search_photos(page_id):

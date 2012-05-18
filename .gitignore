@@ -2,6 +2,7 @@
 *.db
 *.swp
 *.ai
+*.psd
 api_keys.py
 memo_setting.txt
 django.wsgi

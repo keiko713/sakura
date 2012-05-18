@@ -52,7 +52,7 @@
 <div class="container">
 <ul class="thumbnails" id="id_thumbnails">
 {% for photo in photos %}
-  <li class="span4">
+  <li class="span4 box">
     <div class="thumbnail">
     <a href="{{ photo.url }}">
       <img src="{{ photo.imgsrc }}">
@@ -76,14 +76,17 @@
   </li>
 {% endfor %}
 </ul>
-<div class="row">
-<button class="btn span12" onclick="getpage()">もっと見る</button>
+<div id="page-nav">
+<a href="/page/2/"></a>
 </div>
 <footer class="footer">
   <p class="pull-right">Created by @keiko713 / <a href="https://github.com/keiko713/sakura">Fork me on GitHub</a></p>
 </footer>
 </div><!-- /container -->
 <script src="{{ STATIC_URL }}js/jquery-1.7.2.min.js"></script>
+<script src="{{ STATIC_URL }}js/jquery.masonry.min.js"></script>
+<script src="{{ STATIC_URL }}js/jquery.infinitescroll.min.js"></script>
+<script src="{{ STATIC_URL }}js/jquery.imagesloaded.min.js"></script>
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
 <script type="text/javascript">
 function viewmap(id, lat, lng) {
@@ -107,24 +110,34 @@ function viewmap(id, lat, lng) {
 
   return false;
 }
-var nextpagenum = 2;
-function getpage() {
-  $.ajax({
-    type: 'GET',
-    url: "/page/" + nextpagenum + "/",
-    success: function(data){
-      html = data.html;
-      var thumbnails = document.getElementById("id_thumbnails");
-      thumbnails.innerHTML = thumbnails.innerHTML + html;
-      adjusttime();
-
-      nextpagenum += 1;
-    }
-  });
-}
 
 $(function(){
   adjusttime();
+
+  $thumbnails = $('#id_thumbnails');
+
+  $thumbnails.imagesLoaded(function(){
+    $thumbnails.masonry({
+      itemSelector: '.box'
+    });
+  });
+
+  $thumbnails.infinitescroll({
+    navSelector: '#page-nav',
+    nextSelector: '#page-nav a',
+    itemSelector: '.box',
+    loading: {
+      img: '{{ STATIC_URL }}img/loading.gif',
+      msgText: '読込中... Loading...',
+    }},
+    function(newElements) {
+      var $newElems = $(newElements).css({ opacity: 0 });
+      $newElems.imagesLoaded(function() {
+        $newElems.css({ opacity: 1 });
+        $thumbnails.masonry('appended', $newElems, true);
+      });
+    }
+  );
 });
 
 function adjusttime() {
@@ -135,10 +148,10 @@ function adjusttime() {
 }
 
 function format(datetime) {
-  var y = datetime.getFullYear();  
-  var m = addzero(datetime.getMonth() + 1);  
+  var y = datetime.getFullYear();
+  var m = addzero(datetime.getMonth() + 1);
   var d = addzero(datetime.getDate());
-  var time = datetime.toLocaleTimeString(); 
+  var time = datetime.toLocaleTimeString();
   return y + '/' + m + '/' + d + ' ' + time;
 }
 
