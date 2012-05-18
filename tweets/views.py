@@ -9,7 +9,7 @@ import urllib2
 import json
 import time
 
-API_JSON_ENCODING = 'ISO-8859-1'
+API_JSON_ENCODING = 'utf-8'
 parse_json = lambda s: json.loads(s.decode(API_JSON_ENCODING))
 
 def index(request):
