@@ -69,10 +69,11 @@ def search_photos(page_id):
                 if is_blacklist_url(tco_url):
                     continue
                 if url and not url_histories.get(url, False):
+                    imgsrc = get_or_save_imgsrc(url, date_epoch)
                     photos.append({
                         'text': text,
                         'url': med['expanded_url'],
-                        'imgsrc': url,
+                        'imgsrc': imgsrc,
                         'date': date_epoch,
                         'geo': geo,
                         'username': username,
@@ -85,7 +86,7 @@ def search_photos(page_id):
                 if is_blacklist_url(tco_url):
                     continue
                 if url and not url_histories.get(url, False):
-                    imgsrc = get_imgsrc(url)
+                    imgsrc = get_or_save_imgsrc(get_imgsrc(url), date_epoch)
                     if imgsrc is not None:
                         photos.append({
                             'text': text,
@@ -97,6 +98,25 @@ def search_photos(page_id):
                         })
                         url_histories[url] = 'true'
     return photos
+
+
+def get_or_save_imgsrc(imgsrc, date_e):
+    """
+    Get image src from Photo model,
+    if there is no imgsrc, then create Photo model.
+    """
+    ps = Photo.objects.filter(origin_path=imgsrc)
+    if ps:
+        p = ps[0]
+        if p.converted:
+            imgsrc = p.converted_path
+    elif imgsrc is not None:
+        time_struct = time.strptime(date_e, "%a, %d %b %Y %H:%M:%S +0000")
+        tweeted_at = datetime.fromtimestamp(time.mktime(time_struct))
+        p = Photo(origin_path=imgsrc,
+            converted_path=None, converted=False, tweeted_at=tweeted_at)
+        p.save()
+    return imgsrc
 
 
 # Check if the URL is in BlackList

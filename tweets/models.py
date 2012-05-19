@@ -22,3 +22,10 @@ class Tweet(models.Model):
 class BlackList(models.Model):
     tco_url = models.CharField(max_length=200, null=True)
     screen_name = models.CharField(max_length=20, null=True)
+
+
+class Photo(models.Model):
+    origin_path = models.CharField(max_length=200)
+    converted_path = models.CharField(max_length=200, null=True)
+    converted = models.BooleanField(default=False)
+    tweeted_at = models.DateTimeField()
