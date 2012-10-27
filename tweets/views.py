@@ -46,7 +46,9 @@ def search_photos(page_id):
     url_histories = {}
 
     for result in results:
-        entities = result['entities']
+        entities = result.get('entities')
+        if not entities:
+            continue
         text = get_urlize_text(result)
         entities_urls = entities['urls']
         media = entities.get('media', '')
@@ -303,14 +305,13 @@ def get_flickr_src(url):
     END_POINT = 'http://api.flickr.com/services/rest/'
     if url.startswith('http://flic.kr/'):
         tmp = url.split('/')
-        id = decode(tmp[-1])
+        flickr_id = decode(tmp[-1])
     else:
         tmp = url.split('/')
-        id = tmp[-2]
+        flickr_id = tmp[-2]
 
-    address = '%s?method=flickr.photos.getSizes&api_key=%s&' \
-            + 'photo_id=%s&format=json&nojsoncallback=1' % (
-        END_POINT, API_KEY, str(id))
+    address = ('%s?method=flickr.photos.getSizes&api_key=%s&photo_id=%s&format=json&nojsoncallback=1') % \
+        (END_POINT, API_KEY, str(flickr_id))
     results = httpget(address)
     sizes = results['sizes']
     size = sizes['size']

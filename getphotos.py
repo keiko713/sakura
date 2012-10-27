@@ -9,7 +9,9 @@ from tweets.models import Photo
 
 photos = Photo.objects.filter(converted=False)
 
-for photo in photos:
+for idx, photo in enumerate(photos):
+    if idx < 0:
+        continue
     url = photo.origin_path
     error = False
 
