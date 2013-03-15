@@ -34,11 +34,11 @@ def get_page(request, page_id):
 
 def search_photos(page_id):
     """
-    Search photos that have hashtag #桜2012
+    Search photos that have hashtag #桜2013
     """
     photos = []
     END_POINT = 'http://search.twitter.com/search.json'
-    search_key_uni = u'#桜2012'
+    search_key_uni = u'#桜2013'
     search_key = urllib2.quote(search_key_uni.encode('utf-8'))
     address = '%s?q=%s&include_entities=1&rpp=100&page=%s' % (
         END_POINT, search_key, page_id)

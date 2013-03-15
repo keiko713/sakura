@@ -3,7 +3,7 @@
 
 Let's look at beautiful Japanese SAKURA pictures from Twitter!
 
-This application shows the photos that were tweeted with #桜2012 hash tag.
+This application shows the photos that were tweeted with #桜2013 hash tag.
 
 
 
@@ -28,7 +28,7 @@ Before quick start (Never run Django before? Do this!)
 
 Copyright and license
 ----------
-Copyright 2012 [Keiko Oda](http://twitter.com/keiko713)
+Copyright 2013 [Keiko Oda](http://twitter.com/keiko713)
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this work except in compliance with the License.
