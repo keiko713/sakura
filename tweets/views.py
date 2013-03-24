@@ -38,7 +38,7 @@ def search_photos(page_id):
     """
     photos = []
     END_POINT = 'http://search.twitter.com/search.json'
-    search_key_uni = u'#桜2013'
+    search_key_uni = u'#桜2013 -RT'
     search_key = urllib2.quote(search_key_uni.encode('utf-8'))
     address = '%s?q=%s&include_entities=1&rpp=100&page=%s' % (
         END_POINT, search_key, page_id)
@@ -261,6 +261,8 @@ def get_imgsrc(url):
       - f.hatena
       - lockerz
       - ow.ly
+      - via.me
+      - pic.twitter.com
     """
     if url.startswith('http://yfrog.com/'):
         return url + ':iphone'
@@ -294,6 +296,10 @@ def get_imgsrc(url):
     if url.startswith('http://ow.ly/i/'):
         tmp = url.split('/')
         return 'http://static.ow.ly/photos/normal/%s.jpg' % (tmp[-1])
+    if url.startswith('http://via.me/'):
+        tmp = url.split('/')
+    if url.startswith('http://pic.twitter.com/'):
+        tmp = url.split('/')
     return None
 
 
