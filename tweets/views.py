@@ -4,6 +4,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext, Context, loader
 from datetime import datetime
 from tweets.models import *
+from sakura import settings
 import urllib2
 import json
 import time
@@ -261,7 +262,6 @@ def get_imgsrc(url):
       - lockerz
       - ow.ly
       - via.me
-      - pic.twitter.com
     """
     if url.startswith('http://yfrog.com/'):
         return url + ':iphone'
@@ -296,9 +296,7 @@ def get_imgsrc(url):
         tmp = url.split('/')
         return 'http://static.ow.ly/photos/normal/%s.jpg' % (tmp[-1])
     if url.startswith('http://via.me/'):
-        tmp = url.split('/')
-    if url.startswith('http://pic.twitter.com/'):
-        tmp = url.split('/')
+        return get_viame_src(url)
     return None
 
 
@@ -324,6 +322,19 @@ def get_flickr_src(url):
         if s['label'] == 'Medium':
             return s['source']
     return url
+
+
+def get_viame_src(url):
+    """
+    Get image src from via.me API.
+    """
+    END_POINT = 'http://via.me/api/v1/posts/'
+    tmp = url.split('/')
+    viame_id = tmp[-1][1:]
+
+    address = END_POINT + viame_id
+    result = httpget(address)['response']['post']
+    return result['thumb_300_url']
 
 
 def decode(s):
