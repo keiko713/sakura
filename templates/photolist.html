@@ -6,7 +6,7 @@
     </a>
     <div class="caption">
     <p class="photo-date">
-      <small><span class="datetime" alt="{{ photo.date }}"></span> by {{ photo.username }}</small>
+      <small><span class="datetime" alt="{{ photo.date }}"></span> by <a href="https://twitter.com/intent/user?screen_name={{ photo.username }}">{{ photo.username }}</a></small>
     </p>
     {% autoescape off %}
     <p>{{ photo.text }}</p>

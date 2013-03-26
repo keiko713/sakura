@@ -4,7 +4,6 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext, Context, loader
 from datetime import datetime
 from tweets.models import *
-import settings
 import urllib2
 import json
 import time

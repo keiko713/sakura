@@ -5,17 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SAKURA PHOTOS</title>
 <link href="{{ STATIC_URL }}img/sakura_logo.ico" rel="shortcut icon">
-<link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet">
-<link href="{{ STATIC_URL }}css/bootstrap-responsive.css" rel="stylesheet">
-<link href="{{ STATIC_URL }}css/docs.css" rel="stylesheet">
-<script src="http://platform.twitter.com/anywhere.js?id=1g01e2qhtEMFHk1ZTG9gQ&v=1" type="text/javascript"></script>
-<script type="text/javascript">
-
-  twttr.anywhere(function (T) {
-    T.hovercards();
-  });
-
-</script>
+{% load compressed %}
+{% compressed_css 'application' %}
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
@@ -32,7 +23,7 @@
 </script>
 </head>
 <body>
-<div class="navbar navbar-fixed-top">
+<div class="navbar navbar-inverse navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
       <a class="brand" href="/">
@@ -59,7 +50,7 @@
     </a>
     <div class="caption">
     <p class="photo-date">
-      <small><span class="datetime" alt="{{ photo.date }}"></span> by {{ photo.username }}</small>
+      <small><span class="datetime" alt="{{ photo.date }}"></span> by <a href="https://twitter.com/intent/user?screen_name={{ photo.username }}">{{ photo.username }}</a></small>
     </p>
     {% autoescape off %}
     <p>{{ photo.text }}</p>
@@ -80,93 +71,14 @@
 <a href="/page/2/"></a>
 </div>
 <footer class="footer">
-  <p class="pull-right">Created by @keiko713 / <a href="https://github.com/keiko713/sakura">Fork me on GitHub</a></p>
+  <p class="pull-right">Created by <a href="https://twitter.com/intent/user?screen_name=keiko713">@keiko713</a> / <a href="https://github.com/keiko713/sakura">Fork me on GitHub</a></p>
 </footer>
 </div><!-- /container -->
-<script src="{{ STATIC_URL }}js/jquery-1.7.2.min.js"></script>
-<script src="{{ STATIC_URL }}js/jquery.masonry.min.js"></script>
-<script src="{{ STATIC_URL }}js/jquery.infinitescroll.min.js"></script>
-<script src="{{ STATIC_URL }}js/jquery.imagesloaded.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
 <script type="text/javascript">
-function viewmap(id, lat, lng) {
-  var mapDiv = document.getElementById(id);
-  if (mapDiv.style.display == "block") {
-    mapDiv.style.display = "none";
-    return false;
-  }
-  mapDiv.style.display = "block";
-  var latlng = new google.maps.LatLng(lat, lng);
-  var myOptions = {
-      zoom: 12,
-      center: latlng,
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-  };
-  map = new google.maps.Map(mapDiv, myOptions);
-  var marker = new google.maps.Marker({
-    position: latlng,
-    map: map,
-  });
-
-  return false;
-}
-
-$(function(){
-  adjusttime();
-
-  $thumbnails = $('#id_thumbnails');
-
-  $thumbnails.imagesLoaded(function(){
-    $thumbnails.masonry({
-      itemSelector: '.box'
-    });
-  });
-
-  $thumbnails.infinitescroll({
-    navSelector: '#page-nav',
-    nextSelector: '#page-nav a',
-    itemSelector: '.box',
-    bufferPx: 1500,
-    loading: {
-      img: '{{ STATIC_URL }}img/loading.gif',
-      msgText: '読込中... Loading...',
-    }},
-    function(newElements) {
-      var $newElems = $(newElements).css({ opacity: 0 });
-      $newElems.imagesLoaded(function() {
-        $newElems.css({ opacity: 1 });
-        $thumbnails.masonry('appended', $newElems, false, function(){
-          $('infscr-loading').hide();
-          adjusttime();
-        });
-      });
-    }
-  );
-});
-
-function adjusttime() {
-  $('.datetime').each(function(idx,obj){
-    var mydate = new Date($(obj).attr('alt'));
-    if(mydate != null) {
-      $(obj).html(format(mydate));
-    }
-  });
-}
-
-function format(datetime) {
-  var y = datetime.getFullYear();
-  var m = addzero(datetime.getMonth() + 1);
-  var d = addzero(datetime.getDate());
-  var time = datetime.toLocaleTimeString();
-  return y + '/' + m + '/' + d + ' ' + time;
-}
-
-function addzero(arg) {
-  if (arg < 10) {
-    arg = '0' + arg;
-  }
-  return arg;
-}
+  var STATIC_URL = "{{STATIC_URL}}";
 </script>
+{% compressed_js 'application' %}
 </body>
 </html>
