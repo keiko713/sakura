@@ -157,7 +157,11 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Set this variables via:
 # [localenv] export FLICKR_API_KEY=yourapikey
 # [herokuenv] heroku config:add FLICKR_API_KEY=yourapikey
-FLICKR_API_KEY = os.environ.get('FLICKR_API_KEY')
+FLICKR_API_KEY          = os.environ.get('FLICKR_API_KEY')
+TWITTER_OAUTH_TOKEN     = os.environ.get('TWITTER_OAUTH_TOKEN')
+TWITTER_OAUTH_SECRET    = os.environ.get('TWITTER_OAUTH_SECRET')
+TWITTER_CONSUMER_KEY    = os.environ.get('TWITTER_CONSUMER_KEY')
+TWITTER_CONSUMER_SECRET = os.environ.get('TWITTER_CONSUMER_SECRET')
 
 # For django-pipeline
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'

@@ -8,21 +8,27 @@ This application shows the photos that were tweeted with #桜2013 hash tag.
 
 
 Quick start
-----------
+-----------
 
- * Clone the repo using the command `git clone git@github.com:keiko713/sakura.git`
- * You need to make api_keys.py and add `FLICKR_API_KEY = 'your flickr API key'` in order to get the photos from flickr
- * Run `python manage.py syncdb` in order to make sqlite database
+ * Install pip (skip if you already have). `[sudo] easy_install pip`
+ * Install virtualenv (skip if you already have). `[sudo] pip install virtualenv`
+ * Clone (or Fork and Clone) the repo `git clone git://github.com/keiko713/sakura.git` or `git clone git@github.com:[yourusername]/sakura.git`
+ * `cd` to `sakura` folder and create a virtualenv `virtualenv venv --distribute`
+ * Activate the virtualenv `source venv/bin/activate`
+ * (Optional) Install libjpeg for jpeg support of PIL `brew install libjpeg`
+ * Install dependencies on the virtualenv `pip install -U -r requirements.txt`
+ * Set following environament variables
+   * `export FLICKR_API_KEY=yourapikey` (You can get it from [here](http://www.flickr.com/services/api/keys/))
+   * `export TWITTER_OAUTH_TOKEN=youroauthtoken` (You can get them from [here](https://dev.twitter.com/apps), you need to create a new application)
+   * `export TWITTER_OAUTH_SECRET=youroauthsecret`
+   * `export TWITTER_CONSUMER_KEY=yourconsumerkey`
+   * `export TWITTER_CONSUMER_SECRET=yourconsumersecret`
+ * Run your postgresql database, create sakura user and sakuraphotos database (you can change the name, but if you change it, you should change var in sakura/settings.py also)
+   * `psql`
+   * `CREATE USER sakura WITH ENCRYPTED PASSWORD 'sakura';`
+   * `CREATE DATABASE sakuraphotos` ENCODING 'UTF8' OWNER sakura;`
+ * Run `python manage.py syncdb`
  * Run `python manage.py runserver`, now you can see the app at http://localhost:8000/
-
-
-
-Before quick start (Never run Django before? Do this!)
-----------
-
- * Install pip (If you have, skip here). `sudo easy_install pip`
- * Install Django. `sudo pip install Django`
- * Now, you can do quick start!
 
 
 

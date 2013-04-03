@@ -41,26 +41,32 @@
   </div>
 </div><!-- /navbar -->
 <div class="container">
+  <p class="pull-right"><small>Created by <a href="https://twitter.com/intent/user?screen_name=keiko713">@keiko713</a> / <a href="https://github.com/keiko713/sakura" target="_blank">Fork me on GitHub</a></small></p>
+</div><!-- /credits -->
+<div class="container">
 <ul class="thumbnails" id="id_thumbnails">
 {% for photo in photos %}
   <li class="span4 box">
     <div class="thumbnail">
-    <a href="{{ photo.url }}">
+    <a href="{{ photo.url }}" target="_blank">
       <img src="{{ photo.imgsrc }}">
     </a>
     <div class="caption">
     <p class="photo-date">
-      <small><span class="datetime" alt="{{ photo.date }}"></span> by <a href="https://twitter.com/intent/user?screen_name={{ photo.username }}">{{ photo.username }}</a></small>
+      <small>
+        <a href="https://twitter.com/{{ photo.username }}/statuses/{{ photo.tweetid }}" target="_blank"><span class="datetime" alt="{{ photo.date }}"></span></a>
+        by
+        <a href="https://twitter.com/intent/user?screen_name={{ photo.username }}">@{{ photo.username }}</a>
+      </small>
     </p>
     {% autoescape off %}
     <p>{{ photo.text }}</p>
     {% endautoescape %}
     {% if photo.geo %}
     <p>
-      <a href="#" onclick="return viewmap('mapcanvas1_{{ forloop.counter }}', {{ photo.geo.coordinates.0 }}, {{ photo.geo.coordinates.1 }});"><i class="icon-screenshot"></i> from {{ photo.geo.addr }}</a>
+      <a href="#" onclick="return viewmap('mapcanvas1_{{ forloop.counter }}', {{ photo.geo.coordinates.1 }}, {{ photo.geo.coordinates.0 }});"><i class="icon-screenshot"></i> from {{ photo.geo.addr }}</a>
+      <div class="mapcanvas" id="mapcanvas1_{{ forloop.counter }}" style="display: none;"></div>
     </p>
-    <div class="mapcanvas" id="mapcanvas1_{{ forloop.counter }}" style="display: none;">
-    </div>
     {% endif %}
     </div>
     </div>
@@ -68,11 +74,9 @@
 {% endfor %}
 </ul>
 <div id="page-nav">
-<a href="/page/2/"></a>
+  <a href="/page/1/"></a>
+  <div class="max-id" style="display: none;" data-maxid="{{ maxid }}"></div>
 </div>
-<footer class="footer">
-  <p class="pull-right">Created by <a href="https://twitter.com/intent/user?screen_name=keiko713">@keiko713</a> / <a href="https://github.com/keiko713/sakura">Fork me on GitHub</a></p>
-</footer>
 </div><!-- /container -->
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>

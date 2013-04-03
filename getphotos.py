@@ -1,9 +1,9 @@
 from PIL import Image
 import urllib2
 import os
-import settings
+from sakura import settings
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'sakura.settings'
 
 from tweets.models import Photo
 

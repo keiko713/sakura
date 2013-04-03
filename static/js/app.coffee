@@ -1,5 +1,5 @@
 # Show or Hide map
-viewmap = (id, lat, lng) ->
+window.viewmap = (id, lat, lng) ->
   mapDiv = document.getElementById(id)
   # hide mapDiv if it's already shown
   if (mapDiv.style.display == "block")
@@ -9,7 +9,7 @@ viewmap = (id, lat, lng) ->
   mapDiv.style.display = "block"
   latlng = new google.maps.LatLng(lat, lng)
   myOptions = {
-    zoom: 12,
+    zoom: 14,
     center: latlng,
     mapTypeId: google.maps.MapTypeId.ROADMAP
   }
@@ -40,6 +40,17 @@ addzero = (arg) ->
   arg = '0' + arg if arg < 10
   return arg
 
+# get min value
+# (digit length is too long so cannot use Math.min.apply)
+getmin = (array) ->
+  min = array[0]
+  for val in array
+    if val < min
+      min = val
+
+  return min
+
+
 # Initialization
 $ ->
   adjusttime()
@@ -60,7 +71,13 @@ $ ->
     loading: {
       img: "#{STATIC_URL}img/loading.gif",
       msgText: '読込中... Loading...',
-    }},
+    },
+    path: (pageNumber) ->
+      maxId = getmin($('.max-id').map(() ->
+        $(this).data('maxid')
+      ).get())
+      return "/page/#{maxId}/"
+    }
     (newElements) ->
       $newElems = $(newElements).css({ opacity: 0 })
       $newElems.imagesLoaded(() ->

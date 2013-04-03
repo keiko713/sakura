@@ -4,10 +4,12 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext, Context, loader
 from datetime import datetime
 from tweets.models import *
+from twitter import *
 from sakura import settings
 import urllib2
 import json
 import time
+import pytz
 
 
 API_JSON_ENCODING = 'utf-8'
@@ -15,34 +17,42 @@ parse_json = lambda s: json.loads(s.decode(API_JSON_ENCODING))
 
 
 def index(request):
-    photos = search_photos('1')
+    photos, max_id = search_photos(None)
     return render_to_response('index.html', {
         'photos': photos,
+        'maxid': max_id,
     }, context_instance=RequestContext(request))
 
 
-def get_page(request, page_id):
+def get_page(request, max_id):
     """
-    Get the given page_id's page, and return the fragment of HTML.
+    Get the tweets that are less than given max_id,
+    and return the fragment of HTML.
     """
-    photos = search_photos(str(page_id))
+    photos, max_id = search_photos(str(max_id))
     return render_to_response('photolist.html', {
         'photos': photos,
-        'pageid': page_id,
+        'maxid': max_id,
     }, context_instance=RequestContext(request))
 
 
-def search_photos(page_id):
+def search_photos(max_id):
     """
     Search photos that have hashtag #桜2013
     """
     photos = []
-    END_POINT = 'http://search.twitter.com/search.json'
+    t = Twitter(auth = OAuth(
+        settings.TWITTER_OAUTH_TOKEN, settings.TWITTER_OAUTH_SECRET,
+        settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET))
     search_key_uni = u'#桜2013 -RT'
     search_key = urllib2.quote(search_key_uni.encode('utf-8'))
-    address = '%s?q=%s&include_entities=1&rpp=100&page=%s' % (
-        END_POINT, search_key, page_id)
-    results = httpget(address)['results']
+    # subtract 1 from max_id (max_id param returns results with and ID
+    # less than (that is, older than) or equal to the specified ID)
+    if max_id is not None:
+        max_id = str(long(max_id) - 1)
+    result = t.search.tweets(q=search_key, count=100, max_id=max_id)
+    results = result['statuses']
+
     url_histories = {}
 
     for result in results:
@@ -54,15 +64,18 @@ def search_photos(page_id):
         media = entities.get('media', '')
         date_epoch = result['created_at']
 
-        from_user = result['from_user']
-        if is_blacklist_name(from_user):
+        username = result['user']['screen_name']
+        if is_blacklist_name(username):
             continue
-        username = '@%s' % (from_user)
 
-        geo = result['geo']
-        if geo:
-            addr = get_location(geo['coordinates'])
-            geo['addr'] = addr
+        coordinates = result['coordinates']
+        if coordinates:
+            addr = get_location(coordinates['coordinates'])
+            coordinates['addr'] = addr
+
+        max_id = max_id or result['id_str']
+        if max_id > result['id_str']:
+            max_id = result['id_str']
 
         if media:
             for med in media:
@@ -77,8 +90,9 @@ def search_photos(page_id):
                         'url': med['expanded_url'],
                         'imgsrc': imgsrc,
                         'date': date_epoch,
-                        'geo': geo,
+                        'geo': coordinates,
                         'username': username,
+                        'tweetid': result['id_str'],
                     })
                     url_histories[url] = 'true'
         elif entities_urls:
@@ -95,11 +109,12 @@ def search_photos(page_id):
                             'url': url,
                             'imgsrc': imgsrc,
                             'date': date_epoch,
-                            'geo': geo,
+                            'geo': coordinates,
                             'username': username,
+                            'tweetid': result['id_str'],
                         })
                         url_histories[url] = 'true'
-    return photos
+    return photos, max_id
 
 
 def get_or_save_imgsrc(imgsrc, date_e):
@@ -113,8 +128,8 @@ def get_or_save_imgsrc(imgsrc, date_e):
         if p.converted:
             imgsrc = p.converted_path
     elif imgsrc is not None:
-        time_struct = time.strptime(date_e, "%a, %d %b %Y %H:%M:%S +0000")
-        tweeted_at = datetime.fromtimestamp(time.mktime(time_struct))
+        time_struct = time.strptime(date_e, "%a %b %d %H:%M:%S +0000 %Y")
+        tweeted_at = datetime.fromtimestamp(time.mktime(time_struct), pytz.UTC)
         p = Photo(origin_path=imgsrc,
             converted_path=None, converted=False, tweeted_at=tweeted_at)
         p.save()
@@ -193,8 +208,8 @@ def get_location(coordinates):
     """
     END_POINT = 'http://geoapi.heartrails.com/api/' \
                 + 'json?method=searchByGeoLocation'
-    lat = coordinates[0]
-    lng = coordinates[1]
+    lng = coordinates[0]
+    lat = coordinates[1]
     address = END_POINT + '&y=' + str(lat) + '&x=' + str(lng)
     results = httpget(address)['response']
     locations = results.get('location', None)
@@ -211,30 +226,30 @@ def get_urlize_text(result):
     """
     text = result['text']
     entities = result['entities']
+
+    hash_tags = entities.get('hashtags', '')
+    if hash_tags:
+        additional_chars = 0
+        for h_tag in hash_tags:
+            href = 'https://twitter.com/search/?q=%23' + h_tag['text'] + '&src=hash'
+            tag = '#' + h_tag['text']
+            urlize = u'<a href="%s" target="_blank">%s</a>' % (href, tag)
+            chunk = h_tag['indices'][0] + additional_chars
+            text = text[:chunk] + text[chunk:].replace(tag, urlize, 1)
+            additional_chars += len(urlize) - len(tag)
+
     urls = result.get('urls', '')
     entities_urls = entities.get('urls', '')
     if urls:
         for url in urls:
-            urlize = '<a href="%s">%s</a>' % (
+            urlize = '<a href="%s" target="_blank">%s</a>' % (
                     url['url'], url['display_url'])
             text = text.replace(url['url'], urlize)
     if entities_urls:
         for e_url in entities_urls:
-            urlize = '<a href="%s">%s</a>' % (
+            urlize = '<a href="%s" target="_blank">%s</a>' % (
                     e_url['url'], e_url['display_url'])
             text = text.replace(e_url['url'], urlize)
-
-    hash_tags = entities.get('hashtags', '')
-    if hash_tags:
-        for h_tag in hash_tags:
-            href = 'https://twitter.com/#!/search/%23' + h_tag['text']
-            tag = '#' + h_tag['text']
-            urlize = u'<a href="%s">%s</a>' % (href, tag)
-            text = text.replace(tag, urlize)
-            # for zenkaku hash tag
-            tag = u'＃' + h_tag['text']
-            urlize = u'<a href="%s">%s</a>' % (href, tag)
-            text = text.replace(tag, urlize)
 
     media = entities.get('media', '')
     if media:

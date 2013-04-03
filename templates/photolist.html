@@ -1,24 +1,30 @@
 {% for photo in photos %}
   <li class="span4 box">
     <div class="thumbnail">
-    <a href="{{ photo.url }}">
+    <a href="{{ photo.url }}" target="_blank">
       <img src="{{ photo.imgsrc }}">
     </a>
     <div class="caption">
     <p class="photo-date">
-      <small><span class="datetime" alt="{{ photo.date }}"></span> by <a href="https://twitter.com/intent/user?screen_name={{ photo.username }}">{{ photo.username }}</a></small>
+      <small>
+        <a href="https://twitter.com/{{ photo.username }}/statuses/{{ photo.tweetid }}" target="_blank"><span class="datetime" alt="{{ photo.date }}"></span></a>
+        by
+        <a href="https://twitter.com/intent/user?screen_name={{ photo.username }}">@{{ photo.username }}</a>
+      </small>
     </p>
     {% autoescape off %}
     <p>{{ photo.text }}</p>
     {% endautoescape %}
     {% if photo.geo %}
     <p>
-      <a href="#" onclick="return viewmap('mapcanvas{{ pageid }}_{{ forloop.counter }}', {{ photo.geo.coordinates.0 }}, {{ photo.geo.coordinates.1 }});"><i class="icon-screenshot"></i> from {{ photo.geo.addr }}</a>
+      <a href="#" onclick="return viewmap('mapcanvas{{ maxid }}_{{ forloop.counter }}', {{ photo.geo.coordinates.1 }}, {{ photo.geo.coordinates.0 }});"><i class="icon-screenshot"></i> from {{ photo.geo.addr }}</a>
+      <div class="mapcanvas" id="mapcanvas{{ maxid }}_{{ forloop.counter }}" style="display: none;"></div>
     </p>
-    <div class="mapcanvas" id="mapcanvas{{ pageid }}_{{ forloop.counter }}" style="display: none;">
-    </div>
     {% endif %}
     </div>
     </div>
+    {% if forloop.first %}
+    <div class="max-id" style="display: none;" data-maxid="{{ maxid }}"></div>
+    {% endif %}
   </li>
 {% endfor %}
