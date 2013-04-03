@@ -32,6 +32,28 @@ Quick start
 
 
 
+Deploying on Heroku
+-------------------
+
+You can deploy SAKURA PHOTOS on Heroku easily.
+ * Clone (or Fork and Clone) the repo `git clone git://github.com/keiko713/sakura.git` or `git clone git@github.com:[yourusername]/sakura.git`
+ * `cd` to `sakura` folder
+ * `heroku create` (I assume you've already done Step 1 to 3 in this [doc](https://devcenter.heroku.com/articles/quickstart))
+ * Change app name with `heroku apps:rename newname` if you want (see [here](https://devcenter.heroku.com/articles/renaming-apps) for detail)
+ * Set all config variables
+   * `heroku config:add FLICKR_API_KEY=yourkey`
+   * `heroku config:add TWITTER_OAUTH_TOKEN=yourkey`
+   * `heroku config:add TWITTER_OAUTH_SECRET=yourkey`
+   * `heroku config:add TWITTER_CONSUMER_KEY=yourkey`
+   * `heroku config:add TWITTER_CONSUMER_SECRET=yourkey`
+ * Change the buildpack for Coffeescript support (I'm using this buildpack temporary, since it's the one works for me)
+   * `heroku config:add BUILDPACK_URL=git://github.com/tmandry/heroku-buildpack-django.git`
+ * `git push heroku master`
+ * `heroku ps:scale web=1`
+ * `heroku open` or just visit `http://yourappname.herokuapp.com/` on the browser
+ * DONE!
+
+
 Copyright and license
 ----------
 Copyright 2013 [Keiko Oda](http://twitter.com/keiko713)
