@@ -41,7 +41,7 @@ def search_photos(max_id):
     Search photos that have hashtag #桜2013
     """
     photos = []
-    t = Twitter(auth = OAuth(
+    t = Twitter(auth=OAuth(
         settings.TWITTER_OAUTH_TOKEN, settings.TWITTER_OAUTH_SECRET,
         settings.TWITTER_CONSUMER_KEY, settings.TWITTER_CONSUMER_SECRET))
     search_key_uni = u'#桜2013 -RT'
@@ -131,7 +131,7 @@ def get_or_save_imgsrc(imgsrc, date_e):
         time_struct = time.strptime(date_e, "%a %b %d %H:%M:%S +0000 %Y")
         tweeted_at = datetime.fromtimestamp(time.mktime(time_struct), pytz.UTC)
         p = Photo(origin_path=imgsrc,
-            converted_path=None, converted=False, tweeted_at=tweeted_at)
+                  converted_path=None, converted=False, tweeted_at=tweeted_at)
         p.save()
     return imgsrc
 
@@ -185,17 +185,17 @@ def add_blacklist(request):
         name = request.GET.get('screen_name', '')
         if not url and not name:
             message = '[Error: Invalid Request Parameters]' \
-              + ' Please put the param either url or screen_name'
+                + ' Please put the param either url or screen_name'
         else:
             if url and not url.startswith('http://t.co/'):
                 message = '[Error: Invalid Request Parameters]' \
-                  + ' Please put http://t.co/ URL for the url parameter'
+                    + ' Please put http://t.co/ URL for the url parameter'
             else:
                 if not is_blacklist_url(url) or not is_blacklist_name(name):
                     black_list = BlackList(tco_url=url, screen_name=name)
                     black_list.save()
                     message = '[Success] Your request is confirmed.' \
-                     + ' Thank you for your help!'
+                        + ' Thank you for your help!'
     resp = HttpResponse(message, 'text/plain')
     resp.code = 200
     return resp
