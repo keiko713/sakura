@@ -1,5 +1,5 @@
 Django==1.5
-PIL==1.2a0
+-e git://github.com/errkk/gitpil.git#egg=PIL
 distribute==0.6.34
 dj-database-url==0.2.1
 django-appconf==0.6
